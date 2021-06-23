@@ -6,14 +6,14 @@ namespace GameCore
     public class WorldManager
     {
         private static List<World> mWorldList { get; set; } = new List<World>();
-        public static  World DefaultGameWorld { get; private set; }
+        public static World DefaultGameWorld { get; private set; }
         public static void CreateWorld<T>() where T : World, new()
         {
             T world = new T();
-            world.OnCreate();
             DefaultGameWorld = world;
             mWorldList.Add(world);
-            TypeManager.InitliztionWorldAssetbly(world);
+            world.OnCreate();
+            TypeManager.InitliztionWorldAssetbly(world, GetBehaviorExecution());
         }
         public static void DestroyWorld<T>(World world) where T : World
         {
@@ -26,7 +26,20 @@ namespace GameCore
                 }
             }
         }
+        public static IBehaviorExecution GetBehaviorExecution()
+        {
+            if (DefaultGameWorld.GetType().Name == "FishWorld")
+            {
+                return new FishGameScriptsBehaviorExecutionOrder();
+            }
+            else if (DefaultGameWorld.GetType().Name=="HallWorld")
+            {
+                return new HallGameScriptsBehaviorExecutionOrder();
+            }
+            return null;
+        }
     }
+
     public class UIManager
     {
 

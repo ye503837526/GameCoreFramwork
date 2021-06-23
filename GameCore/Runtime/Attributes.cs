@@ -1,6 +1,9 @@
 ﻿using System;
-using GameCore.FishGame;
-using UnityEngine.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace GameCore
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
@@ -30,25 +33,6 @@ namespace GameCore
             Order = order;
         }
         public int Order { get; }
-    }
-
-    public class ScriptsBehaviorExecutionOrder
-    {
-        public static Type[] LogicBehaviorExecutions = new Type[] {
-         typeof(PlayerManager),
-         typeof(FishManager),
-          typeof(UserManager),
-        };
-
-        public static Type[] DataBehaviorExecutions = new Type[] {
-        typeof(RoomDataManager),
-        typeof(PlayerDataManager),
-        };
-
-        public static Type[] MsgBehaviorExecutions = new Type[] {
-        typeof(FishMsgManager),
-        typeof(WindowMsgManager),
-        };
     }
     public class TypeOrder
     {

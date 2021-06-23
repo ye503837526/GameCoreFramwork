@@ -1,76 +1,97 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 namespace GameCore
 {
-    public  class World
+    public abstract class World
     {
         private static UIManager mUimanager;
         public readonly static UIManager UIManager;
         public static World mWorld => WorldManager.DefaultGameWorld;
-        private List<ILogicBehaviour> mLogicBehavioursList=new List<ILogicBehaviour>();
-        private List<IDataBehaviour> mDataBehavioursList = new List<IDataBehaviour>();
-        private List<IMsgBehaviour> mMsgBehavioursList = new List<IMsgBehaviour>();
+        private List<LogicBehaviour> mLogicBehavioursList = new List<LogicBehaviour>();
+        private List<DataBehaviour> mDataBehavioursList = new List<DataBehaviour>();
+        private List<MsgBehaviour> mMsgBehavioursList = new List<MsgBehaviour>();
+
 
         public virtual void OnCreate() { }
         public virtual void OnUpdate() { }
         public virtual void OnDestroy() { }
 
-        public static T GetExistLogicMgr<T>() where T : ILogicBehaviour
+        public static T GetExistLogicCtrl<T>() where T : ILogicBehaviour
         {
             for (int i = 0; i < mWorld.mLogicBehavioursList.Count; i++)
             {
-                if (Type.Equals(mWorld.mLogicBehavioursList[i], typeof(T)))
+                LogicBehaviour logicBehaviour = mWorld.mLogicBehavioursList[i];
+                if (string.Equals(logicBehaviour.name, typeof(T).Name))
                 {
-                    return  (T)mWorld.mLogicBehavioursList[i] ;
-                }
-            }
-            Debug.LogError(typeof(T).Name+ "Not existent Plase Check Param is Error!");
-            return default(T);
-        }
-        public static T GetExitsDataCtrl<T>() where T : IDataBehaviour  
-        {
-            for (int i = 0; i < mWorld.mLogicBehavioursList.Count; i++)
-            {
-                if (Type.Equals(mWorld.mLogicBehavioursList[i], typeof(T)))
-                {
-                    return (T)mWorld.mLogicBehavioursList[i];
+                    return (T)logicBehaviour.behaviour;
                 }
             }
             Debug.LogError(typeof(T).Name + "Not existent Plase Check Param is Error!");
             return default(T);
         }
-        public static T GetExitsNet<T>() where T : IMsgBehaviour 
+        public static T GetExitsDataMgr<T>() where T : IDataBehaviour
         {
-            for (int i = 0; i < mWorld.mLogicBehavioursList.Count; i++)
+            for (int i = 0; i < mWorld.mDataBehavioursList.Count; i++)
             {
-                if (Type.Equals(mWorld.mLogicBehavioursList[i], typeof(T)))
+                DataBehaviour dataBehaviour = mWorld.mDataBehavioursList[i];
+                if (string.Equals(dataBehaviour.name, typeof(T).Name))
                 {
-                    return (T)mWorld.mLogicBehavioursList[i];
+                    return (T)dataBehaviour.behaviour;
                 }
             }
             Debug.LogError(typeof(T).Name + "Not existent Plase Check Param is Error!");
             return default(T);
         }
- 
-        public void AddLogicMgr(ILogicBehaviour logicBehaviour)
+        public static T GetExitsMsgConter<T>() where T : IMsgBehaviour
         {
-            mWorld. mLogicBehavioursList.Add(logicBehaviour);
+            for (int i = 0; i < mWorld.mMsgBehavioursList.Count; i++)
+            {
+                MsgBehaviour msgBehaviour = mWorld.mMsgBehavioursList[i];
+                if (string.Equals(msgBehaviour.name, typeof(T).Name))
+                {
+                    return (T)msgBehaviour.behaviour;
+                }
+            }
+            Debug.LogError(typeof(T).Name + "Not existent Plase Check Param is Error!");
+            return default(T);
+        }
+
+        public void AddLogicCtrl(ILogicBehaviour logicBehaviour)
+        {
+            mWorld.mLogicBehavioursList.Add(new LogicBehaviour { name = logicBehaviour.GetType().Name, behaviour = logicBehaviour });
             logicBehaviour.OnCreate();
         }
 
         public void AddDataMgr(IDataBehaviour dataBehaviour)
         {
-            mWorld.mDataBehavioursList.Add(dataBehaviour);
+            mWorld.mDataBehavioursList.Add(new DataBehaviour { name = dataBehaviour.GetType().Name, behaviour = dataBehaviour });
             dataBehaviour.OnCreate();
         }
 
-        public void AddMsgCtrl(IMsgBehaviour msgBehaviour)
+        public void AddMsgConter(IMsgBehaviour msgBehaviour)
         {
-            mWorld.mMsgBehavioursList.Add(msgBehaviour);
+            mWorld.mMsgBehavioursList.Add(new MsgBehaviour { name = msgBehaviour.GetType().Name, behaviour = msgBehaviour });
             msgBehaviour.OnCreate();
         }
 
+        //这里没有使用资源存储的原因是：
+        //1.字典在IL中性能存在问题
+        //2.在帧同步中会造成不同步 原因是字典在不同平台中遍历顺序不一样会导致结果不同
+        private class LogicBehaviour
+        {
+            public string name;
+            public ILogicBehaviour behaviour;
+        }
+        private class DataBehaviour
+        {
+            public string name;
+            public IDataBehaviour behaviour;
+        }
+        private class MsgBehaviour
+        {
+            public string name;
+            public IMsgBehaviour behaviour;
+        }
+  
     }
 }

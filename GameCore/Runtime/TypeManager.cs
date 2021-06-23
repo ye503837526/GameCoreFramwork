@@ -8,25 +8,19 @@ namespace GameCore
 {
     public class TypeManager
     {
-        public static void InitliztionWorldAssetbly(World world)
+        public static IBehaviorExecution BehaviorExecution;
+        public static void InitliztionWorldAssetbly(World world,IBehaviorExecution behaviorExecution)
         {
-
+            BehaviorExecution = behaviorExecution;
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             Assembly worldAssembly = null;
             foreach (var assembly in assemblies)
             {
-                string[] names = assembly.GetManifestResourceNames();
-                if (assembly.FullName.Contains("Game"))
+                if (assembly.GetName().Name == "GameCore")
                 {
-                    UnityEngine.Debug.Log("assembly.FullName:" + assembly.FullName);
-                    AssemblyName[] assemblyNames = assembly.GetReferencedAssemblies();
-                    if (assembly.GetName().Name == "GameCore")
-                    {
-                        worldAssembly = assembly;
-                        break;
-                    }
+                    worldAssembly = assembly;
+                    break;
                 }
-
             }
             if (worldAssembly == null)
             {
@@ -57,13 +51,13 @@ namespace GameCore
                 }
                 if (logicType.IsAssignableFrom(type))
                 {
-                    int order= GetLogicBehaviourOrderIndex(type);
-                    logicBehaviourlsit.Add(new TypeOrder(order, type) );
+                    int order = GetLogicBehaviourOrderIndex(type);
+                    logicBehaviourlsit.Add(new TypeOrder(order, type));
                 }
                 else if (dataType.IsAssignableFrom(type))
                 {
                     int order = GetDataBehaviourOrderIndex(type);
-                    dataBehaviourlsit.Add(new TypeOrder(order,type));
+                    dataBehaviourlsit.Add(new TypeOrder(order, type));
                 }
                 else if (msgType.IsAssignableFrom(type))
                 {
@@ -82,11 +76,11 @@ namespace GameCore
             }
             for (int i = 0; i < msgBehaviourlsit.Count; i++)
             {
-                world.AddMsgCtrl(Activator.CreateInstance(msgBehaviourlsit[i].Type) as IMsgBehaviour);
+                world.AddMsgConter(Activator.CreateInstance(msgBehaviourlsit[i].Type) as IMsgBehaviour);
             }
             for (int i = 0; i < logicBehaviourlsit.Count; i++)
             {
-                world.AddLogicMgr(Activator.CreateInstance(logicBehaviourlsit[i].Type) as ILogicBehaviour);
+                world.AddLogicCtrl(Activator.CreateInstance(logicBehaviourlsit[i].Type) as ILogicBehaviour);
             }
 
             logicBehaviourlsit.Clear();
@@ -99,27 +93,30 @@ namespace GameCore
 
         public static int GetLogicBehaviourOrderIndex(Type logicType)
         {
-            for (int i = 0; i < ScriptsBehaviorExecutionOrder.LogicBehaviorExecutions.Length; i++)
+            Type[] logicTypes = BehaviorExecution.GetLogicBehaviorExecutions();
+            for (int i = 0; i < logicTypes.Length; i++)
             {
-                if (ScriptsBehaviorExecutionOrder.LogicBehaviorExecutions[i] == logicType)
+                if (logicTypes[i] == logicType)
                     return i;
             }
             return 999;
         }
         public static int GetDataBehaviourOrderIndex(Type dataType)
         {
-            for (int i = 0; i < ScriptsBehaviorExecutionOrder.DataBehaviorExecutions.Length; i++)
+            Type[] dataTypes = BehaviorExecution.GetDataBehaviorExecutions();
+            for (int i = 0; i < dataTypes.Length; i++)
             {
-                if (ScriptsBehaviorExecutionOrder.DataBehaviorExecutions[i] == dataType)
+                if (dataTypes[i] == dataType)
                     return i;
             }
             return 999;
         }
         public static int GetMsgBehaviourOrderIndex(Type msgType)
         {
-            for (int i = 0; i < ScriptsBehaviorExecutionOrder.MsgBehaviorExecutions.Length; i++)
+            Type[] msgTypes = BehaviorExecution.GetMsgBehaviorExecutions();
+            for (int i = 0; i < msgTypes.Length; i++)
             {
-                if (ScriptsBehaviorExecutionOrder.MsgBehaviorExecutions[i] == msgType)
+                if (msgTypes[i] == msgType)
                     return i;
             }
             return 999;
